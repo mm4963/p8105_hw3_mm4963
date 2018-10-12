@@ -64,4 +64,48 @@ brfss_data %>%
 
 ```
 
+## Question 2
+
+This data consists of `r nrow(instacart)` observations over `r ncol(instacart)` variables.
+
+There are `r instacart %>% distinct(aisle_id) %>% nrow()` distinct isles. 
+
+
+```{r}
+
+instacart %>% 
+  distinct(aisle_id) %>%
+  nrow()
+
+instacart %>%
+  group_by(aisle) %>%
+  count(aisle) %>%
+  arrange(-n) %>%
+  head(5)
+
+instacart %>%
+  group_by(aisle) %>%
+  count() %>%
+  ggplot(aes(x = aisle, y = n)) +
+  geom_point() +
+  coord_flip()
+
+instacart %>%
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>%
+  group_by(aisle) %>%
+  count(product_name) %>%
+  top_n(5) %>%
+  knitr::kable()
+
+
+instacart %>%
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>%
+  group_by(product_name, order_dow) %>%
+  summarize(mean_time_of_day = mean(order_hour_of_day)) %>%
+  spread(key = product_name, value = mean_time_of_day) %>%
+  mutate(order_dow = order_dow + 1,
+         order_dow = DescTools::day.name[order_dow]) %>%
+  knitr::kable()
+  
+```
 
