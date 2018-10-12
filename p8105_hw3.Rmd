@@ -28,15 +28,17 @@ brfss_data = brfss_smart2010 %>%
   separate(locationdesc, into = c("remove", "county"), sep = " - ") %>%
   select(-c(remove)) %>%
   rename(state = locationabbr) %>%
-  mutate(response = factor(response))
-  
+  mutate(response = factor(response, 
+                           levels = c("Excellent", "Very good", "Good", "Fair", "Poor")))
+
 
 brfss_data %>%
   filter(year == 2002) %>%
   distinct(county, .keep_all = T) %>%
   group_by(state) %>%
   summarize(n = n()) %>%
-  filter(n == 7)
+  filter(n == 7) %>%
+  knitr::kable()
 
 brfss_data %>% 
   distinct(county, year, .keep_all = TRUE) %>%
@@ -49,9 +51,10 @@ brfss_data %>%
 
 brfss_data %>%
   filter(year %in% c(2002, 2006, 2010), state == "NY", response == "Excellent") %>%
-  group_by(year, county) %>%
+  group_by(year) %>%
   summarize(mean = mean(data_value, na.rm = T),
-            sd = sd(data_value, na.rm = T))
+            sd = sd(data_value, na.rm = T)) %>%
+  knitr::kable()
 
 
 brfss_data %>%
@@ -71,7 +74,7 @@ This data consists of `r nrow(instacart)` observations over `r ncol(instacart)` 
 There are `r instacart %>% distinct(aisle_id) %>% nrow()` distinct isles. 
 
 
-```{r}
+```{r q2}
 
 instacart %>% 
   distinct(aisle_id) %>%
@@ -81,7 +84,8 @@ instacart %>%
   group_by(aisle) %>%
   count(aisle) %>%
   arrange(-n) %>%
-  head(5)
+  head(5) %>%
+  knitr::kable()
 
 instacart %>%
   group_by(aisle) %>%
@@ -108,4 +112,47 @@ instacart %>%
   knitr::kable()
   
 ```
+
+
+## Question 3
+
+```{r q3, eval=FALSE}
+
+ny_noaa_clean = ny_noaa %>%
+  janitor::clean_names() %>%
+  separate(date, into = c("year", "month", "day"), sep = "-") %>%
+  mutate(tmax = as.integer(tmax), 
+         tmin = as.integer(tmin))
+  
+
+ny_noaa_clean %>%
+  count(snow) %>%
+  top_n(5) %>%
+  knitr::kable()
+
+ny_noaa_clean %>%
+  filter(month %in% c("01", "07")) %>%
+  group_by(month, id, year) %>%
+  summarize(mean_tmax = mean(tmax, na.rm = TRUE)) %>%
+  ggplot(aes(x = id, y = mean_tmax)) +
+    geom_point() +
+    facet_grid(. ~ month)
+
+
+tmax_vs_tmin = ny_noaa_clean %>%
+  ggplot(aes(x = tmax, y = tmin)) +
+  geom_point()
+
+snow_per_year = ny_noaa_clean %>%
+  filter(snow %in% c(1:99)) %>%
+  group_by(year) %>%
+  ggplot(aes(x = snow)) +
+  geom_histogram()
+
+tmax_vs_tmin + snow_per_year
+
+```
+
+
+
 
